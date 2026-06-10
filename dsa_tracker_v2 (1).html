@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSA A2Z Tracker — Pattern Format</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --surface3: #22222f;
+    --border: #2a2a3a;
+    --border2: #3a3a50;
+    --text: #e8e8f0;
+    --muted: #8888a8;
+    --faint: #444460;
+    
+    /* Softened difficulty badge variables */
+    --easy: #4ade80;
+    --easy-bg: rgba(74, 222, 128, 0.1);
+    --easy-border: rgba(74, 222, 128, 0.25);
+    
+    --medium: #fb923c;
+    --medium-bg: rgba(251, 146, 60, 0.1);
+    --medium-border: rgba(251, 146, 60, 0.25);
+    
+    --hard: #f87171;
+    --hard-bg: rgba(248, 113, 113, 0.1);
+    --hard-border: rgba(248, 113, 113, 0.25);
+    
+    --accent: #818cf8;
+    --accent2: #38bdf8;
+    --gold: #fbbf24;
+
+    /* Transition & Radius Variables */
+    --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; }
+
+  /* HEADER */
+  .header {
+    padding: 1.5rem 2rem 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(135deg, rgba(10, 10, 15, 0.8) 0%, rgba(18, 16, 30, 0.8) 100%);
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .title-block h1 { font-size: 1.55rem; font-weight: 800; letter-spacing: -0.02em; color: #fff; }
+  .title-block h1 span { color: var(--accent); }
+  .title-block p { font-size: 0.75rem; color: var(--muted); margin-top: 0.35rem; font-family: 'JetBrains Mono', monospace; letter-spacing: -0.01em; }
+  .stats-bar { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: center; }
+  .stat { text-align: center; }
+  .stat-val { font-size: 1.45rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; }
+  .stat-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .stat.total .stat-val { color: var(--accent); }
+  .stat.easy .stat-val { color: var(--easy); }
+  .stat.medium .stat-val { color: var(--medium); }
+  .stat.hard .stat-val { color: var(--hard); }
+  
+  .progress-wrap { margin-top: 1.25rem; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); margin-bottom: 0.45rem; font-family: 'JetBrains Mono', monospace; letter-spacing: -0.01em; }
+  .progress-bar { height: 6px; background: var(--surface3); border-radius: 999px; overflow: hidden; display: flex; box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4); }
+  .pb-easy { background: var(--easy); transition: width 0.4s; }
+  .pb-medium { background: var(--medium); transition: width 0.4s; }
+  .pb-hard { background: var(--hard); transition: width 0.4s; }
+
+  /* CONTROLS */
+  .controls {
+    padding: 0.75rem 2rem;
+    display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .search-wrap { position: relative; flex: 1; min-width: 180px; max-width: 280px; }
+  .search-wrap input {
+    width: 100%; padding: 0.5rem 0.7rem 0.5rem 2rem;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text); font-size: 0.8rem;
+    font-family: 'JetBrains Mono', monospace; outline: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.02);
+    transition: all var(--transition-fast);
+  }
+  .search-wrap input:focus {
+    border-color: var(--accent);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(129, 140, 248, 0.25);
+  }
+  .search-icon { position: absolute; left: 0.7rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 0.85rem; pointer-events: none; }
+  .btn-group { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+  
+  .filter-btn, .toggle-solved {
+    padding: 0.4rem 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border2);
+    background: var(--surface2); color: var(--muted); font-size: 0.75rem;
+    cursor: pointer; font-family: 'Syne', sans-serif; font-weight: 600;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: all var(--transition-normal); white-space: nowrap;
+  }
+  .filter-btn:hover, .toggle-solved:hover {
+    color: var(--text);
+    background: var(--surface3);
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 8px rgba(0, 0, 0, 0.25);
+  }
+  .filter-btn:active, .toggle-solved:active {
+    transform: translateY(1px);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+  .filter-btn.f-all.active { background: var(--surface3); border-color: var(--accent); color: var(--accent); box-shadow: 0 0 8px rgba(129, 140, 248, 0.2); }
+  .filter-btn.f-easy.active { background: var(--easy-bg); border-color: var(--easy); color: var(--easy); box-shadow: 0 0 8px rgba(74, 222, 128, 0.2); }
+  .filter-btn.f-medium.active { background: var(--medium-bg); border-color: var(--medium); color: var(--medium); box-shadow: 0 0 8px rgba(251, 146, 60, 0.2); }
+  .filter-btn.f-hard.active { background: var(--hard-bg); border-color: var(--hard); color: var(--hard); box-shadow: 0 0 8px rgba(248, 113, 113, 0.2); }
+  
+  .toggle-solved { margin-left: auto; }
+  .toggle-solved.active { background: var(--surface3); border-color: var(--gold); color: var(--gold); box-shadow: 0 0 8px rgba(251, 191, 36, 0.2); }
+
+  /* LAYOUT */
+  .layout { display: flex; height: calc(100vh - 170px); min-height: 400px; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 250px; min-width: 250px; overflow-y: auto;
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0.75rem 0.5rem;
+  }
+  
+  /* Scrollbar Optimization for Sidebar & Table Area */
+  .sidebar, .table-area {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s;
+  }
+  .sidebar:hover, .table-area:hover {
+    scrollbar-color: var(--border2) transparent;
+  }
+  .sidebar::-webkit-scrollbar, .table-area::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .sidebar::-webkit-scrollbar-track, .table-area::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .sidebar::-webkit-scrollbar-thumb, .table-area::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 99px;
+    transition: background 0.3s ease;
+  }
+  .sidebar:hover::-webkit-scrollbar-thumb, .table-area:hover::-webkit-scrollbar-thumb {
+    background: var(--border2);
+  }
+  .sidebar::-webkit-scrollbar-thumb:hover, .table-area::-webkit-scrollbar-thumb:hover {
+    background: var(--muted);
+  }
+
+  .pattern-item {
+    padding: 0.7rem 0.85rem; cursor: pointer;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.3rem;
+    border-left: 3px solid transparent;
+    transition: all var(--transition-normal); display: flex; align-items: center; gap: 0.65rem;
+  }
+  .pattern-item:hover {
+    background: var(--surface2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+  .pattern-item.active {
+    background: var(--surface3);
+    border-left-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  }
+  .p-num {
+    font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; color: var(--faint);
+    min-width: 24px; text-align: left; flex-shrink: 0;
+    letter-spacing: -0.01em; line-height: 1.2;
+  }
+  .p-info { flex: 1; min-width: 0; }
+  .p-name { font-size: 0.78rem; font-weight: 700; color: var(--muted); line-height: 1.35; letter-spacing: -0.01em; transition: color var(--transition-fast); }
+  .pattern-item.active .p-name { color: #fff; }
+  .pattern-item:hover .p-name { color: var(--text); }
+  
+  .p-meta { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+  .p-badge {
+    font-size: 0.58rem; font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    padding: 1px 5px; border-radius: 3px;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+  }
+  .pb-e { background: var(--easy-bg); color: var(--easy); border: 1px solid var(--easy-border); }
+  .pb-m { background: var(--medium-bg); color: var(--medium); border: 1px solid var(--medium-border); }
+  .pb-h { background: var(--hard-bg); color: var(--hard); border: 1px solid var(--hard-border); }
+  .p-total {
+    font-size: 0.65rem; font-family: 'JetBrains Mono', monospace;
+    color: var(--faint); line-height: 1.2;
+    transition: color var(--transition-fast);
+  }
+  .pattern-item.active .p-total { color: var(--accent); }
+
+  /* TABLE AREA */
+  .table-area { flex: 1; overflow-y: auto; }
+
+  .sec-header {
+    padding: 1rem 1.5rem 0.8rem;
+    position: sticky; top: 0;
+    background: rgba(10, 10, 15, 0.75);
+    z-index: 10;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+  }
+  .sec-title { font-size: 1rem; font-weight: 800; color: #fff; letter-spacing: -0.01em; }
+  .sec-sub { font-size: 0.72rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; letter-spacing: -0.01em; margin-top: 1px; }
+  .sec-counts { display: flex; gap: 0.5rem; margin-left: auto; }
+  .sc { font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; padding: 3px 8px; border-radius: 4px; font-weight: 600; letter-spacing: 0.01em; line-height: 1.2; }
+  .sc-e { background: var(--easy-bg); border: 1px solid var(--easy-border); color: var(--easy); }
+  .sc-m { background: var(--medium-bg); border: 1px solid var(--medium-border); color: var(--medium); }
+  .sc-h { background: var(--hard-bg); border: 1px solid var(--hard-border); color: var(--hard); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--surface); border-bottom: 1px solid var(--border); }
+  thead th {
+    padding: 0.75rem 1.2rem; text-align: left; font-size: 0.68rem;
+    text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted);
+    font-family: 'JetBrains Mono', monospace; font-weight: 600; white-space: nowrap;
+  }
+  thead th:first-child { width: 44px; text-align: center; }
+  thead th:nth-child(2) { width: 40px; }
+  thead th:nth-child(3) { min-width: 260px; }
+  thead th:nth-child(4) { width: 100px; }
+  thead th:nth-child(5) { width: 160px; }
+
+  tbody tr { border-bottom: 1px solid var(--border); transition: background-color var(--transition-fast); cursor: pointer; }
+  tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+  tbody tr.solved { opacity: 0.45; }
+  tbody tr.solved .prob-name { text-decoration: line-through; }
+  tbody tr.hidden { display: none; }
+
+  td { padding: 0.8rem 1.2rem; font-size: 0.82rem; vertical-align: middle; }
+  td:first-child { text-align: center; }
+
+  .check-cell input[type=checkbox] { display: none; }
+  .check-cell label {
+    width: 18px; height: 18px; border: 1.5px solid var(--border2);
+    border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all var(--transition-fast); color: transparent; font-size: 10px;
+    font-weight: 800; background: var(--surface2); user-select: none;
+  }
+  .check-cell label:hover {
+    border-color: var(--accent);
+    background: var(--surface3);
+    transform: scale(1.05);
+  }
+  .check-cell label:active {
+    transform: scale(0.9);
+  }
+  .check-cell input:checked + label {
+    background: var(--easy);
+    border-color: var(--easy);
+    color: var(--bg);
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.4);
+    animation: checkPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes checkPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+    100% { transform: scale(1.1); }
+  }
+
+  .row-num { font-size: 0.68rem; color: var(--faint); font-family: 'JetBrains Mono', monospace; letter-spacing: -0.01em; }
+  .prob-name { font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+  
+  .diff-badge {
+    display: inline-block; font-size: 0.65rem; font-family: 'JetBrains Mono', monospace;
+    padding: 3px 8px; border-radius: 4px; font-weight: 700;
+    letter-spacing: 0.02em; line-height: 1.2;
+  }
+  .diff-easy { background: var(--easy-bg); border: 1px solid var(--easy-border); color: var(--easy); }
+  .diff-medium { background: var(--medium-bg); border: 1px solid var(--medium-border); color: var(--medium); }
+  .diff-hard { background: var(--hard-bg); border: 1px solid var(--hard-border); color: var(--hard); }
+  
+  .stack-tag {
+    font-size: 0.65rem; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+    background: var(--surface2); padding: 3px 8px; border-radius: 4px;
+    border: 1px solid var(--border); white-space: nowrap;
+    letter-spacing: -0.01em; line-height: 1.2;
+  }
+
+  .subsec-row td {
+    background: var(--surface2); color: var(--accent2); font-size: 0.68rem;
+    font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+    letter-spacing: 0.08em; padding: 0.45rem 1.2rem; font-weight: 700;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .empty-msg { padding: 3rem; text-align: center; color: var(--faint); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+
+  /* ANALYTICS DASHBOARD */
+  .analytics-overlay {
+    position: fixed; inset: 0; background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    z-index: 999; display: flex; justify-content: center; align-items: center;
+    opacity: 1; transition: opacity 0.3s ease;
+  }
+  .analytics-overlay.hidden {
+    opacity: 0; pointer-events: none;
+  }
+  .analytics-container {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; width: 90%; max-width: 800px; max-height: 90vh;
+    overflow-y: auto; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  }
+  .analytics-container::-webkit-scrollbar { width: 4px; }
+  .analytics-container::-webkit-scrollbar-thumb { background: var(--border2); }
+  .analytics-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;
+  }
+  .analytics-header h2 { font-size: 1.4rem; font-weight: 800; color: #fff; }
+  .analytics-header h2 span { color: var(--accent); }
+  .close-btn {
+    background: none; border: none; color: var(--muted); font-size: 1.2rem;
+    cursor: pointer; transition: color 0.2s;
+  }
+  .close-btn:hover { color: var(--hard); }
+
+  .metrics-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .metric-card {
+    background: var(--surface2); padding: 1.5rem; border-radius: 8px;
+    text-align: center; border: 1px solid var(--border2);
+  }
+  .metric-card .metric-val { font-size: 2rem; font-weight: 800; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .metric-card .metric-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.5rem; }
+
+  .chart-section { margin-bottom: 2rem; }
+  .chart-section h3 { font-size: 0.85rem; color: var(--text); margin-bottom: 1rem; font-family: 'JetBrains Mono', monospace; }
+
+  /* HEATMAP */
+  .heatmap-container {
+    display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 1fr);
+    gap: 4px; overflow-x: auto; padding-bottom: 0.5rem;
+  }
+  .heatmap-cell {
+    width: 14px; height: 14px; border-radius: 3px; background: var(--surface3);
+    position: relative; cursor: pointer; transition: transform 0.1s;
+  }
+  .heatmap-cell:hover { transform: scale(1.2); z-index: 10; border: 1px solid var(--text); }
+  .heatmap-cell[data-level="1"] { background: rgba(129, 140, 248, 0.3); }
+  .heatmap-cell[data-level="2"] { background: rgba(129, 140, 248, 0.6); }
+  .heatmap-cell[data-level="3"] { background: rgba(129, 140, 248, 0.9); }
+  .heatmap-cell[data-level="4"] { background: #818cf8; box-shadow: 0 0 8px rgba(129, 140, 248, 0.5); }
+
+  .canvas-wrapper { height: 250px; display: flex; justify-content: center; }
+
+  @media (max-width: 700px) {
+    .sidebar { width: 190px; min-width: 190px; padding: 0.5rem 0.25rem; }
+    .pattern-item { padding: 0.6rem 0.7rem; gap: 0.5rem; }
+    .header { padding: 1.25rem 1rem 1rem; }
+    .controls { padding: 0.6rem 1rem; gap: 0.5rem; }
+    .layout { height: calc(100vh - 165px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="title-block">
+      <h1>DSA <span>A2Z</span> — Pattern Tracker</h1>
+      <p>Striver's Sheet · 15 Patterns · 438 Problems</p>
+    </div>
+    <div class="stats-bar">
+      <div class="stat total"><div class="stat-val" id="stat-total">438</div><div class="stat-label">Total</div></div>
+      <div class="stat easy"><div class="stat-val" id="stat-easy">0</div><div class="stat-label">Easy</div></div>
+      <div class="stat medium"><div class="stat-val" id="stat-medium">0</div><div class="stat-label">Medium</div></div>
+      <div class="stat hard"><div class="stat-val" id="stat-hard">0</div><div class="stat-label">Hard</div></div>
+      <div class="stat" style="border-left:1px solid var(--border);padding-left:1.2rem;">
+        <div class="stat-val" id="stat-solved" style="color:var(--gold)">0</div>
+        <div class="stat-label">Solved</div>
+      </div>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="prog-label">0 / 438 solved</span>
+      <span id="prog-pct">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="pb-easy" id="pb-easy" style="width:0%"></div>
+      <div class="pb-medium" id="pb-medium" style="width:0%"></div>
+      <div class="pb-hard" id="pb-hard" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="search" placeholder="Search problems..." autocomplete="off">
+  </div>
+  <div class="btn-group">
+    <button class="filter-btn f-all active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn f-easy" onclick="setFilter('easy',this)">Easy</button>
+    <button class="filter-btn f-medium" onclick="setFilter('medium',this)">Medium</button>
+    <button class="filter-btn f-hard" onclick="setFilter('hard',this)">Hard</button>
+    <button class="filter-btn f-analytics" onclick="toggleAnalytics()">📊 Analytics</button>
+  </div>
+  <button class="toggle-solved" id="toggleSolvedBtn" onclick="toggleSolvedHide()">Hide Solved</button>
+</div>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="table-area" id="tableArea">
+    <div class="empty-msg">← Select a pattern</div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// DATA — 15 Patterns, 438 problems total
+// Each problem: { n: name, d: difficulty, s: stack/topic }
+// ══════════════════════════════════════════════════════════════════
+const PATTERNS = [
+{
+  id: 0,
+  name: "Basic Programming & Mathematics",
+  subsections: [
+    { name: "Basic Maths", stack: "Maths", problems: [
+      {n:"Count Digits", d:"easy"},
+      {n:"Reverse a Number", d:"easy"},
+      {n:"Check Palindrome Number", d:"easy"},
+      {n:"GCD or HCF", d:"easy"},
+      {n:"Armstrong Numbers", d:"easy"},
+      {n:"Print all Divisors", d:"easy"},
+      {n:"Check for Prime", d:"easy"},
+      {n:"Divisors of a Number", d:"easy"},
+      {n:"Pow(x,n)", d:"easy"},
+    ]},
+    { name: "Basic Recursion", stack: "Recursion", problems: [
+      {n:"Print 1 to N using Recursion", d:"easy"},
+      {n:"Print N to 1 using Recursion", d:"easy"},
+      {n:"Sum of First N Numbers (Recursion)", d:"easy"},
+      {n:"Factorial of N (Recursion)", d:"easy"},
+      {n:"Fibonacci Number (Recursion)", d:"easy"},
+      {n:"Reverse an Array (Recursion)", d:"easy"},
+      {n:"Check String Palindrome (Recursion)", d:"easy"},
+      {n:"Sum of Digits (Recursion)", d:"easy"},
+      {n:"Power using Recursion", d:"easy"},
+    ]},
+    { name: "Basic Hashing", stack: "Hashing", problems: [
+      {n:"Hashing Theory & Techniques", d:"easy"},
+      {n:"Count Frequency using Hashing", d:"easy"},
+      {n:"Find Highest/Lowest Frequency Element", d:"easy"},
+    ]},
+    { name: "Advanced Maths", stack: "Maths", problems: [
+      {n:"Print Prime Factors of a Number", d:"hard"},
+      {n:"Count Primes in Range L to R", d:"hard"},
+      {n:"Prime Factorisation of a Number", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 1,
+  name: "Sorting Algorithms",
+  subsections: [
+    { name: "Basic Sorts", stack: "Sorting", problems: [
+      {n:"Selection Sort", d:"easy"},
+      {n:"Bubble Sort", d:"easy"},
+      {n:"Insertion Sorting", d:"easy"},
+      {n:"Recursive Bubble Sort", d:"easy"},
+      {n:"Recursive Insertion Sort", d:"easy"},
+    ]},
+    { name: "Advanced Sorts", stack: "Sorting", problems: [
+      {n:"Quick Sorting", d:"easy"},
+      {n:"Merge Sorting", d:"medium"},
+    ]},
+  ]
+},
+{
+  id: 2,
+  name: "Array Manipulation",
+  subsections: [
+    { name: "Easy Array Operations", stack: "Arrays", problems: [
+      {n:"Largest Element", d:"easy"},
+      {n:"Second Largest Element", d:"easy"},
+      {n:"Check if the Array is Sorted II", d:"easy"},
+      {n:"Remove Duplicates from Sorted Array", d:"easy"},
+      {n:"Left Rotate Array by One", d:"easy"},
+      {n:"Left Rotate Array by K Places", d:"easy"},
+      {n:"Move Zeros to End", d:"easy"},
+      {n:"Linear Search", d:"easy"},
+      {n:"Union of Two Sorted Arrays", d:"easy"},
+      {n:"Find Missing Number", d:"easy"},
+      {n:"Maximum Consecutive Ones", d:"easy"},
+      {n:"Two Sum", d:"easy"},
+      {n:"Majority Element-I", d:"easy"},
+      {n:"Pascal's Triangle I", d:"easy"},
+    ]},
+    { name: "Two Pointers & Prefix Sum", stack: "Arrays", problems: [
+      {n:"Find the Number That Appears Once (other numbers twice)", d:"medium"},
+      {n:"Longest Subarray with Given Sum K (positives)", d:"medium"},
+      {n:"Longest Subarray with Sum K", d:"medium"},
+      {n:"Sort an Array of 0's 1's and 2's", d:"medium"},
+      {n:"Kadane's Algorithm", d:"medium"},
+      {n:"Print Subarray with Maximum Subarray Sum", d:"medium"},
+      {n:"Stock Buy and Sell", d:"medium"},
+      {n:"Rearrange Array Elements by Sign", d:"medium"},
+      {n:"Next Permutation", d:"medium"},
+      {n:"Leaders in an Array", d:"medium"},
+      {n:"Longest Consecutive Sequence in an Array", d:"medium"},
+      {n:"Set Matrix Zeroes", d:"medium"},
+      {n:"Rotate Matrix by 90 Degrees", d:"medium"},
+      {n:"Print the Matrix in Spiral Manner", d:"medium"},
+      {n:"Count Subarrays with Given Sum", d:"medium"},
+      {n:"3 Sum", d:"medium"},
+      {n:"4 Sum", d:"medium"},
+      {n:"Largest Subarray with Sum 0", d:"medium"},
+      {n:"Merge Overlapping Subintervals", d:"medium"},
+      {n:"Merge Two Sorted Arrays Without Extra Space", d:"medium"},
+    ]},
+    { name: "Advanced Array Problems", stack: "Arrays", problems: [
+      {n:"Majority Element-II", d:"hard"},
+      {n:"Count Subarrays with Given XOR K", d:"hard"},
+      {n:"Find the Repeating and Missing Number", d:"hard"},
+      {n:"Count Inversions", d:"hard"},
+      {n:"Reverse Pairs", d:"hard"},
+      {n:"Maximum Product Subarray in an Array", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 3,
+  name: "Binary Search",
+  subsections: [
+    { name: "BS on 1D Arrays", stack: "Binary Search", problems: [
+      {n:"Search X in Sorted Array", d:"easy"},
+      {n:"Lower Bound", d:"easy"},
+      {n:"Upper Bound", d:"easy"},
+      {n:"Search Insert Position", d:"easy"},
+      {n:"Floor and Ceil in Sorted Array", d:"easy"},
+      {n:"First and Last Occurrence", d:"easy"},
+      {n:"Count Occurrences in a Sorted Array", d:"easy"},
+      {n:"Find Minimum in Rotated Sorted Array", d:"easy"},
+      {n:"Find Out How Many Times the Array is Rotated", d:"easy"},
+      {n:"Search in Rotated Sorted Array-I", d:"medium"},
+      {n:"Search in Rotated Sorted Array-II", d:"medium"},
+      {n:"Single Element in a Sorted Array", d:"medium"},
+      {n:"Find Peak Element", d:"medium"},
+    ]},
+    { name: "BS on Answer Space", stack: "Binary Search", problems: [
+      {n:"Find Square Root of a Number", d:"medium"},
+      {n:"Find Nth Root of a Number", d:"medium"},
+      {n:"Koko Eating Bananas", d:"medium"},
+      {n:"Minimum Days to Make M Bouquets", d:"medium"},
+      {n:"Find the Smallest Divisor", d:"medium"},
+      {n:"Capacity to Ship Packages Within D Days", d:"medium"},
+      {n:"Kth Missing Positive Number", d:"medium"},
+      {n:"Painter's Partition", d:"medium"},
+      {n:"Kth Element of 2 Sorted Arrays", d:"medium"},
+      {n:"Aggressive Cows", d:"hard"},
+      {n:"Book Allocation Problem", d:"hard"},
+      {n:"Split Array - Largest Sum", d:"hard"},
+      {n:"Minimize Max Distance to Gas Station", d:"hard"},
+      {n:"Median of 2 Sorted Arrays", d:"hard"},
+    ]},
+    { name: "BS on 2D Arrays", stack: "Binary Search", problems: [
+      {n:"Find Row with Maximum 1's", d:"easy"},
+      {n:"Search in a 2D Matrix", d:"hard"},
+      {n:"Search in 2D Matrix - II", d:"hard"},
+      {n:"Find Peak Element - II", d:"medium"},
+      {n:"Matrix Median", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 4,
+  name: "String Manipulation",
+  subsections: [
+    { name: "Easy String Operations", stack: "Strings", problems: [
+      {n:"Largest Odd Number in a String", d:"easy"},
+      {n:"Longest Common Prefix", d:"easy"},
+      {n:"Isomorphic String", d:"easy"},
+      {n:"Rotate String", d:"easy"},
+      {n:"Check if Two Strings are Anagram of Each Other", d:"easy"},
+      {n:"Sort Characters by Frequency", d:"easy"},
+      {n:"Count Number of Substrings", d:"easy"},
+      {n:"Hashing In Strings (Theory)", d:"easy"},
+    ]},
+    { name: "String Algorithms", stack: "Strings", problems: [
+      {n:"Remove Outermost Parentheses", d:"medium"},
+      {n:"Reverse Words in a Given String / Palindrome Check", d:"medium"},
+      {n:"Maximum Nesting Depth of the Parentheses", d:"medium"},
+      {n:"Roman to Integer", d:"medium"},
+      {n:"String to Integer (atoi)", d:"medium"},
+      {n:"Longest Palindromic Substring", d:"medium"},
+      {n:"Sum of Beauty of All Substrings", d:"medium"},
+      {n:"Reverse Every Word in a String", d:"medium"},
+    ]},
+    { name: "Advanced String Problems", stack: "Strings", problems: [
+      {n:"Minimum Number of Bracket Reversals to Balance", d:"hard"},
+      {n:"Count and Say", d:"hard"},
+      {n:"Rabin Karp Algorithm", d:"hard"},
+      {n:"Z Function", d:"hard"},
+      {n:"KMP Algorithm / LPS Array", d:"hard"},
+      {n:"Shortest Palindrome", d:"hard"},
+      {n:"Longest Happy Prefix", d:"hard"},
+      {n:"Count Palindromic Subsequences", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 5,
+  name: "Linked List Operations",
+  subsections: [
+    { name: "Basic Linked List", stack: "Linked List", problems: [
+      {n:"Introduction to Singly LinkedList", d:"easy"},
+      {n:"Insertion at the Head of Linked List", d:"easy"},
+      {n:"Deletion of the Head of LL", d:"easy"},
+      {n:"Find the Length of the Linked List", d:"easy"},
+      {n:"Introduction to Doubly LL", d:"easy"},
+      {n:"Insert Node Before Head in Doubly Linked List", d:"easy"},
+      {n:"Delete Head of Doubly Linked List", d:"easy"},
+    ]},
+    { name: "Two Pointers in Linked List", stack: "Linked List", problems: [
+      {n:"Search in Linked List", d:"medium"},
+      {n:"Reverse a Doubly Linked List", d:"medium"},
+      {n:"Middle of a LinkedList", d:"medium"},
+      {n:"Reverse a LinkedList [Iterative]", d:"medium"},
+      {n:"Reverse a LL", d:"medium"},
+      {n:"Detect a Loop in LL", d:"medium"},
+      {n:"Find the Starting Point in LL (Loop)", d:"medium"},
+      {n:"Length of Loop in LL", d:"medium"},
+      {n:"Check if LL is Palindrome or Not", d:"medium"},
+      {n:"Segregate Odd and Even Nodes in Linked List", d:"medium"},
+      {n:"Remove Nth Node from the Back of the LL", d:"medium"},
+      {n:"Delete the Middle Node in LL", d:"medium"},
+      {n:"Sort a Linked List of 0's 1's and 2's", d:"medium"},
+      {n:"Find the Intersection Point of Y LL", d:"medium"},
+      {n:"Add One to a Number Represented by LL", d:"medium"},
+      {n:"Add Two Numbers in Linked List", d:"medium"},
+      {n:"Find Pairs with Given Sum in Doubly Linked List", d:"medium"},
+    ]},
+    { name: "Advanced Linked List", stack: "Linked List", problems: [
+      {n:"Sort LL", d:"hard"},
+      {n:"Delete All Occurrences of a Key in DLL", d:"hard"},
+      {n:"Remove Duplicates from Sorted DLL", d:"hard"},
+      {n:"Reverse LL in Group of Given Size K", d:"hard"},
+      {n:"Rotate a LL", d:"hard"},
+      {n:"Flattening of LL", d:"hard"},
+      {n:"Clone a LL with Random and Next Pointer", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 6,
+  name: "Recursion & Backtracking",
+  subsections: [
+    { name: "Basic Recursion & Subsequences", stack: "Recursion", problems: [
+      {n:"Pow(x, n)", d:"easy"},
+      {n:"Learn All Patterns of Subsequences (Theory)", d:"easy"},
+      {n:"Count All Subsequences with Sum K", d:"easy"},
+      {n:"Check if There Exists a Subsequence with Sum K", d:"easy"},
+      {n:"Recursive Implementation of atoi()", d:"medium"},
+      {n:"Count Good Numbers", d:"medium"},
+      {n:"Sort a Stack Using Recursion", d:"medium"},
+      {n:"Reverse a Stack", d:"medium"},
+    ]},
+    { name: "Combinations & Subsets", stack: "Backtracking", problems: [
+      {n:"Generate Binary Strings Without Consecutive 1s", d:"medium"},
+      {n:"Generate Parentheses", d:"medium"},
+      {n:"Power Set", d:"medium"},
+      {n:"Combination Sum", d:"medium"},
+      {n:"Combination Sum II", d:"medium"},
+      {n:"Subsets I", d:"medium"},
+      {n:"Subsets II", d:"medium"},
+      {n:"Combination Sum III", d:"medium"},
+      {n:"Word Break", d:"medium"},
+    ]},
+    { name: "Complex Backtracking", stack: "Backtracking", problems: [
+      {n:"Letter Combinations of a Phone Number", d:"hard"},
+      {n:"Palindrome Partitioning", d:"hard"},
+      {n:"Word Search", d:"hard"},
+      {n:"N Queen", d:"hard"},
+      {n:"Rat in a Maze", d:"hard"},
+      {n:"M Coloring Problem", d:"hard"},
+      {n:"Sudoku Solver", d:"hard"},
+      {n:"Expression Add Operators", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 7,
+  name: "Bit Manipulation",
+  subsections: [
+    { name: "Basic Bit Operations", stack: "Bit Manipulation", problems: [
+      {n:"Introduction to Bits and Tricks", d:"easy"},
+      {n:"Check if the i-th Bit is Set or Not", d:"easy"},
+      {n:"Check if a Number is Odd or Not", d:"easy"},
+      {n:"Check if a Number is Power of 2 or Not", d:"easy"},
+      {n:"Count the Number of Set Bits", d:"easy"},
+      {n:"Set/Unset the Rightmost Unset Bit", d:"easy"},
+      {n:"Swap Two Numbers", d:"easy"},
+      {n:"Bit PreRequisites for TRIE Problems", d:"easy"},
+    ]},
+    { name: "Intermediate Bit Problems", stack: "Bit Manipulation", problems: [
+      {n:"Divide Two Numbers Without Multiplication and Division", d:"medium"},
+      {n:"Minimum Bit Flips to Convert Number", d:"medium"},
+      {n:"Single Number - I", d:"medium"},
+      {n:"Power Set Bit Manipulation", d:"medium"},
+      {n:"XOR of Numbers in a Given Range", d:"medium"},
+      {n:"Single Number - III", d:"medium"},
+    ]},
+  ]
+},
+{
+  id: 8,
+  name: "Stack & Queue",
+  subsections: [
+    { name: "Basic Stack Operations", stack: "Stack & Queue", problems: [
+      {n:"Implement Stack using Arrays", d:"easy"},
+      {n:"Implement Queue using Arrays", d:"easy"},
+      {n:"Implement Stack using Queue", d:"easy"},
+      {n:"Implement Queue using Stack", d:"easy"},
+      {n:"Implement Stack using Linkedlist", d:"easy"},
+      {n:"Implement Queue using Linkedlist", d:"easy"},
+      {n:"Balanced Parenthesis", d:"easy"},
+      {n:"Postfix to Infix Conversion", d:"easy"},
+      {n:"Number of Greater Elements to the Right", d:"easy"},
+    ]},
+    { name: "Stack/Queue Applications & Monotonic", stack: "Stack & Queue", problems: [
+      {n:"Infix to Postfix Conversion", d:"medium"},
+      {n:"Prefix to Infix Conversion", d:"medium"},
+      {n:"Prefix to Postfix Conversion", d:"medium"},
+      {n:"Postfix to Prefix Conversion", d:"medium"},
+      {n:"Infix to Prefix Conversion", d:"medium"},
+      {n:"Next Greater Element", d:"medium"},
+      {n:"Next Greater Element - 2", d:"medium"},
+      {n:"Next Smaller Element", d:"medium"},
+      {n:"Sum of Subarray Minimums", d:"medium"},
+      {n:"Asteroid Collision", d:"medium"},
+      {n:"Sum of Subarray Ranges", d:"medium"},
+      {n:"Remove K Digits", d:"medium"},
+      {n:"LRU Cache", d:"medium"},
+    ]},
+    { name: "Advanced Stack/Queue Problems", stack: "Stack & Queue", problems: [
+      {n:"Implement Min Stack", d:"hard"},
+      {n:"Trapping Rainwater", d:"hard"},
+      {n:"Largest Rectangle in a Histogram", d:"hard"},
+      {n:"Maximum Rectangles", d:"hard"},
+      {n:"Sliding Window Maximum", d:"hard"},
+      {n:"Stock Span Problem", d:"hard"},
+      {n:"Celebrity Problem", d:"hard"},
+      {n:"LFU Cache", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 9,
+  name: "Sliding Window & Two Pointers",
+  subsections: [
+    { name: "Medium Problems", stack: "Sliding Window", problems: [
+      {n:"Longest Substring Without Repeating Characters", d:"medium"},
+      {n:"Max Consecutive Ones III", d:"medium"},
+      {n:"Fruit Into Baskets", d:"medium"},
+      {n:"Maximum Points You Can Obtain from Cards", d:"medium"},
+      {n:"Subarrays with K Different Integers", d:"medium"},
+    ]},
+    { name: "Hard Problems", stack: "Sliding Window", problems: [
+      {n:"Longest Repeating Character Replacement", d:"hard"},
+      {n:"Binary Subarrays With Sum", d:"hard"},
+      {n:"Count Number of Nice Subarrays", d:"hard"},
+      {n:"Number of Substrings Containing All Three Characters", d:"hard"},
+      {n:"Longest Substring With At Most K Distinct Characters", d:"hard"},
+      {n:"Minimum Window Substring", d:"hard"},
+      {n:"Minimum Window Subsequence", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 10,
+  name: "Tree Algorithms",
+  subsections: [
+    { name: "Basic Tree Traversals & BST Basics", stack: "Binary Tree / BST", problems: [
+      {n:"Introduction to Trees", d:"easy"},
+      {n:"Binary Tree Representation in Java", d:"easy"},
+      {n:"Pre/Post/Inorder in One Traversal", d:"easy"},
+      {n:"Preorder Traversal", d:"easy"},
+      {n:"Inorder Traversal", d:"easy"},
+      {n:"Postorder Traversal", d:"easy"},
+      {n:"Level Order Traversal", d:"easy"},
+      {n:"Iterative Preorder Traversal", d:"easy"},
+      {n:"Iterative Inorder Traversal", d:"easy"},
+      {n:"Post-order Traversal using 2 Stacks", d:"easy"},
+      {n:"Post-order Traversal using 1 Stack", d:"easy"},
+      {n:"Diameter of Binary Tree", d:"easy"},
+      {n:"Count Total Nodes in a Complete BT", d:"easy"},
+      {n:"Introduction to BST", d:"easy"},
+      {n:"Search in a Binary Search Tree", d:"easy"},
+      {n:"Find Min/Max in BST", d:"easy"},
+      {n:"Floor and Ceil in a BST", d:"easy"},
+      {n:"Floor in a Binary Search Tree", d:"easy"},
+    ]},
+    { name: "Tree Properties & Algorithms", stack: "Binary Tree / BST", problems: [
+      {n:"Maximum Depth in BT", d:"medium"},
+      {n:"Check for Balanced Binary Tree", d:"medium"},
+      {n:"Maximum Path Sum", d:"medium"},
+      {n:"Check if Two Trees are Identical or Not", d:"medium"},
+      {n:"Zig Zag or Spiral Traversal", d:"medium"},
+      {n:"Boundary Traversal", d:"medium"},
+      {n:"Vertical Order Traversal", d:"medium"},
+      {n:"Top View of BT", d:"medium"},
+      {n:"Bottom View of BT", d:"medium"},
+      {n:"Right/Left View of Binary Tree", d:"medium"},
+      {n:"Symmetric Binary Tree", d:"medium"},
+      {n:"Print Root to Leaf Path in BT", d:"medium"},
+      {n:"Maximum Width of BT", d:"medium"},
+      {n:"Children Sum Property in Binary Tree", d:"medium"},
+      {n:"Requirements Needed to Construct a Unique BT", d:"medium"},
+      {n:"Flatten Binary Tree to Linked List", d:"medium"},
+      {n:"Insert a Given Node in BST", d:"medium"},
+      {n:"Delete a Node in BST", d:"medium"},
+      {n:"Kth Smallest and Largest Element in BST", d:"medium"},
+      {n:"Check if a Tree is a BST or Not", d:"medium"},
+      {n:"LCA in BST", d:"medium"},
+      {n:"Construct a BST from a Preorder Traversal", d:"medium"},
+      {n:"Inorder Successor/Predecessor in BST", d:"medium"},
+    ]},
+    { name: "Advanced Tree Problems", stack: "Binary Tree / BST", problems: [
+      {n:"LCA in BT", d:"hard"},
+      {n:"Print All Nodes at a Distance of K in BT", d:"hard"},
+      {n:"Minimum Time Taken to Burn the BT from a Given Node", d:"hard"},
+      {n:"Construct a BT from Preorder and Inorder", d:"hard"},
+      {n:"Construct the Binary Tree from Postorder and Inorder Traversal", d:"hard"},
+      {n:"Serialize and De-serialize BT", d:"hard"},
+      {n:"Morris Preorder Traversal", d:"hard"},
+      {n:"Morris Inorder Traversal", d:"hard"},
+      {n:"Merge 2 BST's", d:"hard"},
+      {n:"Two Sum In BST (Check if Pair with Sum K Exists)", d:"hard"},
+      {n:"Correct BST with Two Nodes Swapped", d:"hard"},
+      {n:"Largest BST in Binary Tree", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 11,
+  name: "Graph Algorithms",
+  subsections: [
+    { name: "Graph Basics & BFS/DFS", stack: "Graphs", problems: [
+      {n:"Introduction to Graph", d:"easy"},
+      {n:"Graph Representation (C++)", d:"easy"},
+      {n:"Graph Representation (Java)", d:"easy"},
+      {n:"MST Theory", d:"easy"},
+      {n:"Connected Components", d:"medium"},
+      {n:"Traversal Techniques (Theory)", d:"medium"},
+      {n:"DFS", d:"medium"},
+      {n:"Number of Provinces", d:"medium"},
+      {n:"Connected Components Problem in Matrix", d:"medium"},
+      {n:"Rotten Oranges", d:"medium"},
+      {n:"Flood Fill Algorithm", d:"medium"},
+      {n:"Distance of Nearest Cell Having One", d:"medium"},
+      {n:"Surrounded Regions", d:"medium"},
+      {n:"Number of Enclaves", d:"medium"},
+      {n:"Number of Islands", d:"medium"},
+      {n:"Course Schedule II", d:"medium"},
+      {n:"Network Delay Time", d:"medium"},
+      {n:"Most Stones Removed with Same Row or Column", d:"medium"},
+      {n:"Swim in Rising Water", d:"medium"},
+    ]},
+    { name: "Cycle Detection & Topological Sort", stack: "Graphs", problems: [
+      {n:"Cycle Detection in Undirected Graph (BFS)", d:"hard"},
+      {n:"Detect a Cycle in an Undirected Graph", d:"hard"},
+      {n:"Word Ladder I", d:"hard"},
+      {n:"Word Ladder II", d:"hard"},
+      {n:"Bipartite Graph (DFS)", d:"hard"},
+      {n:"Cycle Detection in Directed Graph (DFS)", d:"hard"},
+      {n:"Topo Sort", d:"hard"},
+      {n:"Topological Sort or Kahn's Algorithm", d:"hard"},
+      {n:"Detect a Cycle in a Directed Graph", d:"hard"},
+      {n:"Course Schedule I", d:"hard"},
+      {n:"Find Eventual Safe States", d:"hard"},
+      {n:"Alien Dictionary", d:"hard"},
+    ]},
+    { name: "Shortest Path & MST & DSU", stack: "Graphs", problems: [
+      {n:"Shortest Path in Undirected Graph with Unit Weights", d:"hard"},
+      {n:"Shortest Path in DAG", d:"hard"},
+      {n:"Dijkstra's Algorithm", d:"hard"},
+      {n:"Why Priority Queue is Used in Dijkstra's Algorithm", d:"hard"},
+      {n:"Shortest Distance in a Binary Maze", d:"hard"},
+      {n:"Path with Minimum Effort", d:"hard"},
+      {n:"Cheapest Flight within K Stops", d:"hard"},
+      {n:"Number of Ways to Arrive at Destination", d:"hard"},
+      {n:"Minimum Multiplications to Reach End", d:"hard"},
+      {n:"Bellman Ford Algorithm", d:"hard"},
+      {n:"Floyd Warshall Algorithm", d:"hard"},
+      {n:"Find the City with Smallest Number of Neighbors", d:"hard"},
+      {n:"Prim's Algorithm", d:"hard"},
+      {n:"Disjoint Set (Union-Find)", d:"hard"},
+      {n:"Find the MST Weight", d:"hard"},
+      {n:"Number of Operations to Make Network Connected", d:"hard"},
+      {n:"Accounts Merge", d:"hard"},
+      {n:"Number of Islands II", d:"hard"},
+      {n:"Making a Large Island", d:"hard"},
+      {n:"Bridges in Graph", d:"hard"},
+      {n:"Articulation Point in Graph", d:"hard"},
+      {n:"Kosaraju's Algorithm", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 12,
+  name: "Dynamic Programming",
+  subsections: [
+    { name: "1D DP & DP Intro", stack: "DP", problems: [
+      {n:"Introduction to DP", d:"easy"},
+      {n:"Assign Cookies (DP)", d:"easy"},
+      {n:"Count Square Submatrices with All Ones", d:"easy"},
+      {n:"Climbing Stairs", d:"medium"},
+      {n:"Frog Jump", d:"medium"},
+      {n:"Frog Jump with K Distances", d:"medium"},
+      {n:"Maximum Sum of Non Adjacent Elements", d:"medium"},
+      {n:"House Robber", d:"medium"},
+      {n:"Ninja's Training", d:"medium"},
+    ]},
+    { name: "2D DP & Grid DP", stack: "DP", problems: [
+      {n:"Grid Unique Paths", d:"medium"},
+      {n:"Unique Paths II", d:"medium"},
+      {n:"Minimum Falling Path Sum", d:"medium"},
+      {n:"Triangle", d:"medium"},
+      {n:"Ninja and His Friends", d:"medium"},
+    ]},
+    { name: "DP on Stocks", stack: "DP", problems: [
+      {n:"Best Time to Buy and Sell Stock I", d:"medium"},
+      {n:"Best Time to Buy and Sell Stock II", d:"medium"},
+      {n:"Best Time to Buy and Sell Stock III", d:"medium"},
+      {n:"Best Time to Buy and Sell Stock IV", d:"medium"},
+      {n:"Best Time to Buy and Sell Stock with Cooldown", d:"medium"},
+      {n:"Best Time to Buy and Sell Stock with Transaction Fees", d:"medium"},
+    ]},
+    { name: "DP on LIS", stack: "DP", problems: [
+      {n:"Longest Increasing Subsequence", d:"medium"},
+      {n:"Print Longest Increasing Subsequence", d:"medium"},
+      {n:"Longest Increasing Subsequence (Binary Search Optimized)", d:"medium"},
+      {n:"Largest Divisible Subset", d:"medium"},
+      {n:"Longest String Chain", d:"medium"},
+      {n:"Longest Bitonic Subsequence", d:"medium"},
+      {n:"Number of Longest Increasing Subsequences", d:"medium"},
+      {n:"Different Ways to Evaluate a Boolean Expression", d:"medium"},
+      {n:"Partition Array for Maximum Sum", d:"medium"},
+    ]},
+    { name: "DP on Subsequences & Knapsack", stack: "DP", problems: [
+      {n:"Subset Sum Equal to Target", d:"hard"},
+      {n:"Partition Equal Subset Sum", d:"hard"},
+      {n:"Partition a Set into Two Subsets with Minimum Absolute Sum Difference", d:"hard"},
+      {n:"Count Subsets with Sum K", d:"hard"},
+      {n:"Count Partitions with Given Difference", d:"hard"},
+      {n:"Minimum Coins", d:"hard"},
+      {n:"Target Sum", d:"hard"},
+      {n:"Coin Change 2", d:"hard"},
+      {n:"Unbounded Knapsack", d:"hard"},
+      {n:"Rod Cutting Problem", d:"hard"},
+    ]},
+    { name: "DP on Strings", stack: "DP", problems: [
+      {n:"Longest Common Subsequence", d:"hard"},
+      {n:"Print Longest Common Subsequence", d:"hard"},
+      {n:"Longest Common Substring", d:"hard"},
+      {n:"Longest Palindromic Subsequence", d:"hard"},
+      {n:"Minimum Insertions to Make String Palindrome", d:"hard"},
+      {n:"Minimum Insertions or Deletions to Convert String A to B", d:"hard"},
+      {n:"Shortest Common Supersequence", d:"hard"},
+      {n:"Distinct Subsequences", d:"hard"},
+      {n:"Edit Distance", d:"hard"},
+      {n:"Wildcard Matching", d:"hard"},
+    ]},
+    { name: "DP — MCM & Hard", stack: "DP", problems: [
+      {n:"Matrix Chain Multiplication", d:"hard"},
+      {n:"Matrix Chain Multiplication (Bottom-Up)", d:"hard"},
+      {n:"Minimum Cost to Cut the Stick", d:"hard"},
+      {n:"Burst Balloons", d:"hard"},
+      {n:"Palindrome Partitioning II", d:"hard"},
+      {n:"Maximum Rectangle Area with all 1's", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 13,
+  name: "Greedy Algorithms",
+  subsections: [
+    { name: "Basic Greedy Problems", stack: "Greedy", problems: [
+      {n:"Assign Cookies", d:"easy"},
+      {n:"Lemonade Change", d:"easy"},
+      {n:"Jump Game - I", d:"easy"},
+    ]},
+    { name: "Intermediate Greedy", stack: "Greedy", problems: [
+      {n:"Fractional Knapsack", d:"medium"},
+      {n:"N Meetings in One Room", d:"medium"},
+      {n:"Jump Game II", d:"medium"},
+      {n:"Minimum Number of Platforms Required for a Railway", d:"medium"},
+      {n:"Job Sequencing Problem", d:"medium"},
+      {n:"Shortest Job First", d:"medium"},
+      {n:"Program for LRU Page Replacement Algorithm", d:"medium"},
+      {n:"Insert Interval", d:"medium"},
+      {n:"Merge Intervals", d:"medium"},
+      {n:"Non-overlapping Intervals", d:"medium"},
+    ]},
+    { name: "Advanced Greedy", stack: "Greedy", problems: [
+      {n:"Valid Parenthesis Checker", d:"hard"},
+      {n:"Candy", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 14,
+  name: "Heap / Priority Queue",
+  subsections: [
+    { name: "Basic Heap Operations", stack: "Heap", problems: [
+      {n:"Heaps (Theory Video)", d:"easy"},
+      {n:"Sort K Sorted Array", d:"easy"},
+      {n:"Replace Elements by Their Rank", d:"easy"},
+    ]},
+    { name: "Heap Applications", stack: "Heap", problems: [
+      {n:"Implement Min Heap", d:"medium"},
+      {n:"Check if an Array Represents a Min Heap", d:"medium"},
+      {n:"Convert Min Heap to Max Heap", d:"medium"},
+      {n:"K-th Largest Element in an Array", d:"medium"},
+      {n:"Kth Smallest Element in an Array", d:"medium"},
+      {n:"Task Scheduler", d:"medium"},
+      {n:"Hand of Straights", d:"medium"},
+      {n:"Design Twitter", d:"medium"},
+      {n:"Minimum Cost to Connect Sticks", d:"medium"},
+      {n:"Top K Frequent Elements", d:"medium"},
+    ]},
+    { name: "Advanced Heap Problems", stack: "Heap", problems: [
+      {n:"Merge K Sorted Lists", d:"hard"},
+      {n:"Kth Largest Element in a Stream of Running Integers", d:"hard"},
+      {n:"Maximum Sum Combination", d:"hard"},
+      {n:"Find Median from Data Stream", d:"hard"},
+    ]},
+  ]
+},
+{
+  id: 15,
+  name: "Trie (Prefix Tree)",
+  subsections: [
+    { name: "Basic Trie Operations", stack: "Trie", problems: [
+      {n:"Trie Implementation and Operations", d:"hard"},
+      {n:"Trie Implementation and Advanced Operations", d:"hard"},
+    ]},
+    { name: "Trie Applications", stack: "Trie", problems: [
+      {n:"Longest Word with All Prefixes", d:"medium"},
+      {n:"Number of Distinct Substrings in a String", d:"medium"},
+    ]},
+    { name: "Advanced Trie Problems", stack: "Trie", problems: [
+      {n:"Maximum XOR of Two Numbers in an Array", d:"hard"},
+      {n:"Maximum XOR with an Element from an Array", d:"hard"},
+    ]},
+  ]
+},
+];
+
+// ══════════════════════════════════════════════════════════════════
+// STATE & INDEX
+// ══════════════════════════════════════════════════════════════════
+let allProblems = [];
+let solved = new Set();
+let currentPattern = -1;
+let currentFilter = 'all';
+let hideSolved = false;
+
+function buildIndex() {
+  let idx = 0;
+  PATTERNS.forEach((pat, pi) => {
+    pat.subsections.forEach(sub => {
+      sub.problems.forEach(p => {
+        allProblems.push({
+          id: idx++,
+          name: p.n,
+          difficulty: p.d,
+          patternIdx: pi,
+          patternName: pat.name,
+          subsection: sub.name,
+          stack: sub.stack
+        });
+      });
+    });
+  });
+}
+
+let solvedMap = new Map(); // Stores id => timestamp
+
+function loadSolved() {
+  try { 
+    const s = localStorage.getItem('dsa_v2_solved'); 
+    if (s) {
+      const parsed = JSON.parse(s);
+      if (Array.isArray(parsed)) {
+        // Check if it's the old flat array format: [0, 1, 5]
+        if (parsed.length > 0 && typeof parsed[0] === 'number') {
+          const now = Date.now();
+          parsed.forEach(id => solvedMap.set(id, now));
+          saveSolved();
+        } 
+        // Check if it's the NEW analytics format: [[0, 171...], [1, 171...]]
+        else if (parsed.length > 0 && Array.isArray(parsed[0]) && typeof parsed[0][0] === 'number') {
+          solvedMap = new Map(parsed);
+        }
+        // SAFETY CATCH: If data was corrupted by the previous bug, clear it to un-freeze the UI
+        else if (parsed.length > 0) {
+          console.warn("Corrupted save data detected. Resetting Map...");
+          solvedMap = new Map();
+          localStorage.removeItem('dsa_v2_solved');
+        }
+      }
+    }
+  } catch(e) { console.error("Could not load solved data", e); }
+  
+  // Sync the old `solved` Set for UI compatibility
+  solved = new Set(solvedMap.keys());
+}
+
+function saveSolved() {
+  try { 
+    localStorage.setItem('dsa_v2_solved', JSON.stringify([...solvedMap.entries()])); 
+    solved = new Set(solvedMap.keys()); // Keep Set synced
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════════════════════
+function updateStats() {
+  const total = allProblems.length;
+  const easy = allProblems.filter(p=>p.difficulty==='easy').length;
+  const med = allProblems.filter(p=>p.difficulty==='medium').length;
+  const hard = allProblems.filter(p=>p.difficulty==='hard').length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-easy').textContent = easy;
+  document.getElementById('stat-medium').textContent = med;
+  document.getElementById('stat-hard').textContent = hard;
+  document.getElementById('stat-solved').textContent = solved.size;
+  document.getElementById('prog-label').textContent = solved.size + ' / ' + total + ' solved';
+  const pct = total ? Math.round(solved.size/total*100) : 0;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('pb-easy').style.width = (easy/total*100)+'%';
+  document.getElementById('pb-medium').style.width = (med/total*100)+'%';
+  document.getElementById('pb-hard').style.width = (hard/total*100)+'%';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════════════════════════════════
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.innerHTML = '';
+
+  // All item
+  const total = allProblems.length;
+  const allItem = document.createElement('div');
+  allItem.className = 'pattern-item' + (currentPattern===-1?' active':'');
+  allItem.innerHTML = `<span class="p-num">ALL</span><div class="p-info"><div class="p-name">All Patterns</div></div><span class="p-total">${total}</span>`;
+  allItem.onclick = () => selectPattern(-1, allItem);
+  sb.appendChild(allItem);
+
+  PATTERNS.forEach((pat, i) => {
+    const probs = pat.subsections.flatMap(s => s.problems);
+    const e = probs.filter(p=>p.d==='easy').length;
+    const m = probs.filter(p=>p.d==='medium').length;
+    const h = probs.filter(p=>p.d==='hard').length;
+    const item = document.createElement('div');
+    item.className = 'pattern-item' + (currentPattern===i?' active':'');
+    item.innerHTML = `
+      <span class="p-num">P${i+1}</span>
+      <div class="p-info">
+        <div class="p-name">${pat.name}</div>
+        <div class="p-meta">
+          ${e ? `<span class="p-badge pb-e">${e}E</span>` : ''}
+          ${m ? `<span class="p-badge pb-m">${m}M</span>` : ''}
+          ${h ? `<span class="p-badge pb-h">${h}H</span>` : ''}
+        </div>
+      </div>
+      <span class="p-total">${probs.length}</span>
+    `;
+    item.onclick = () => selectPattern(i, item);
+    sb.appendChild(item);
+  });
+}
+
+function selectPattern(idx, el) {
+  currentPattern = idx;
+  document.querySelectorAll('.pattern-item').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// TABLE
+// ══════════════════════════════════════════════════════════════════
+function renderTable() {
+  const area = document.getElementById('tableArea');
+  const search = document.getElementById('search').value.toLowerCase();
+
+  let problems = currentPattern === -1
+    ? allProblems
+    : allProblems.filter(p => p.patternIdx === currentPattern);
+
+  if (currentFilter !== 'all') problems = problems.filter(p => p.difficulty === currentFilter);
+  if (search) problems = problems.filter(p => p.name.toLowerCase().includes(search));
+  if (hideSolved) problems = problems.filter(p => !solved.has(p.id));
+
+  if (!problems.length) {
+    area.innerHTML = '<div class="empty-msg">No problems match your filters.</div>';
+    return;
+  }
+
+  const patLabel = currentPattern === -1 ? 'All Patterns' : `P${currentPattern+1}: ${PATTERNS[currentPattern].name}`;
+  const solvedHere = problems.filter(p => solved.has(p.id)).length;
+  const eCount = problems.filter(p=>p.difficulty==='easy').length;
+  const mCount = problems.filter(p=>p.difficulty==='medium').length;
+  const hCount = problems.filter(p=>p.difficulty==='hard').length;
+
+  let html = `<div class="sec-header">
+    <div>
+      <div class="sec-title">${patLabel}</div>
+      <div class="sec-sub">${problems.length} problems · ${solvedHere} solved</div>
+    </div>
+    <div class="sec-counts">
+      ${eCount ? `<span class="sc sc-e">${eCount} Easy</span>` : ''}
+      ${mCount ? `<span class="sc sc-m">${mCount} Med</span>` : ''}
+      ${hCount ? `<span class="sc sc-h">${hCount} Hard</span>` : ''}
+    </div>
+  </div>`;
+
+  html += `<table><thead><tr>
+    <th>✓</th><th>#</th><th>Problem</th><th>Difficulty</th><th>Topic / Stack</th>
+  </tr></thead><tbody>`;
+
+  // Group by subsection
+  const groups = {};
+  const groupOrder = [];
+  problems.forEach(p => {
+    const key = (currentPattern === -1 ? `P${p.patternIdx+1}: ${p.patternName} › ` : '') + p.subsection;
+    if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
+    groups[key].push(p);
+  });
+
+  let rowNum = 1;
+  groupOrder.forEach(sec => {
+    html += `<tr class="subsec-row"><td colspan="5">${sec}</td></tr>`;
+    groups[sec].forEach(p => {
+      const isSolved = solved.has(p.id);
+      const dClass = 'diff-' + p.difficulty;
+      const dLabel = p.difficulty.charAt(0).toUpperCase() + p.difficulty.slice(1);
+      html += `<tr data-id="${p.id}" class="${isSolved?'solved':''}" onclick="toggleSolve(${p.id},this)">
+        <td class="check-cell" onclick="event.stopPropagation()">
+          <input type="checkbox" id="cb${p.id}" ${isSolved?'checked':''} onclick="toggleSolve(${p.id}, this.closest('tr'))">
+          <label for="cb${p.id}">✓</label>
+        </td>
+        <td><span class="row-num">${rowNum++}</span></td>
+        <td><span class="prob-name">${p.name}</span></td>
+        <td><span class="diff-badge ${dClass}">${dLabel}</span></td>
+        <td><span class="stack-tag">${p.stack}</span></td>
+      </tr>`;
+    });
+  });
+
+  html += '</tbody></table>';
+  area.innerHTML = html;
+}
+
+function toggleSolve(id, row) {
+  if (solvedMap.has(id)) {
+    solvedMap.delete(id);
+  } else {
+    solvedMap.set(id, Date.now());
+  }
+  saveSolved();
+  row.classList.toggle('solved', solvedMap.has(id));
+  const cb = document.getElementById('cb'+id);
+  if (cb) cb.checked = solvedMap.has(id);
+  updateStats();
+  renderSidebar();
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function toggleSolvedHide() {
+  hideSolved = !hideSolved;
+  document.getElementById('toggleSolvedBtn').classList.toggle('active', hideSolved);
+  renderTable();
+}
+
+document.getElementById('search').addEventListener('input', renderTable);
+
+// ══════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════
+buildIndex();
+loadSolved();
+updateStats();
+renderSidebar();
+
+// Show all on load
+const allItem = document.querySelector('.pattern-item');
+allItem.classList.add('active');
+currentPattern = -1;
+renderTable();
+
+// Log total count for verification
+console.log('Total problems indexed:', allProblems.length);
+
+// ══════════════════════════════════════════════════════════════════
+// ANALYTICS DASHBOARD LOGIC
+// ══════════════════════════════════════════════════════════════════
+let diffChartInstance = null;
+
+function toggleAnalytics() {
+  const modal = document.getElementById('analytics-view');
+  modal.classList.toggle('hidden');
+  if (!modal.classList.contains('hidden')) {
+    generateAnalytics();
+  }
+}
+
+function generateAnalytics() {
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  
+  // 1. Process Timeline Data
+  const daysMap = new Map();
+  let solvedLast7 = 0;
+  
+  solvedMap.forEach((timestamp, id) => {
+    const d = new Date(timestamp);
+    d.setHours(0,0,0,0);
+    const dateStr = d.toISOString().split('T')[0];
+    
+    daysMap.set(dateStr, (daysMap.get(dateStr) || 0) + 1);
+    
+    const diffTime = Math.abs(now - d);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays <= 7) solvedLast7++;
+  });
+
+  document.getElementById('stat-7days').textContent = solvedLast7;
+
+  // 2. Calculate Streak
+  let streak = 0;
+  let checkDate = new Date(now);
+  while (true) {
+    const dateStr = checkDate.toISOString().split('T')[0];
+    if (daysMap.has(dateStr)) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else {
+      if (streak === 0 && checkDate.getTime() === now.getTime()) {
+        // Allow streak to continue if nothing solved TODAY yet, but check yesterday
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+  }
+  document.getElementById('stat-streak').textContent = streak;
+
+  // 3. Render GitHub Heatmap (Last 60 Days)
+  const heatmap = document.getElementById('heatmap-container');
+  heatmap.innerHTML = '';
+  
+  for (let i = 59; i >= 0; i--) {
+    const targetDate = new Date(now);
+    targetDate.setDate(targetDate.getDate() - i);
+    const dateStr = targetDate.toISOString().split('T')[0];
+    
+    const count = daysMap.get(dateStr) || 0;
+    let level = 0;
+    if (count >= 1 && count <= 2) level = 1;
+    else if (count >= 3 && count <= 5) level = 2;
+    else if (count >= 6 && count <= 9) level = 3;
+    else if (count >= 10) level = 4;
+
+    const cell = document.createElement('div');
+    cell.className = 'heatmap-cell';
+    cell.setAttribute('data-level', level);
+    cell.title = `${count} problems solved on ${dateStr}`;
+    heatmap.appendChild(cell);
+  }
+
+  // 4. Render Chart.js Doughnut
+  const ctx = document.getElementById('difficultyChart').getContext('2d');
+  
+  // Calculate specific solved counts
+  let eCount = 0, mCount = 0, hCount = 0;
+  solvedMap.forEach((_, id) => {
+    const prob = allProblems.find(p => p.id === id);
+    if (prob) {
+      if (prob.difficulty === 'easy') eCount++;
+      if (prob.difficulty === 'medium') mCount++;
+      if (prob.difficulty === 'hard') hCount++;
+    }
+  });
+
+  if (diffChartInstance) diffChartInstance.destroy();
+  
+  Chart.defaults.color = '#8888a8';
+  Chart.defaults.font.family = "'JetBrains Mono', monospace";
+
+  diffChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Easy', 'Medium', 'Hard'],
+      datasets: [{
+        data: [eCount, mCount, hCount],
+        backgroundColor: ['#4ade80', '#fb923c', '#f87171'],
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right' }
+      },
+      cutout: '75%'
+    }
+  });
+}
+</script>
+
+<div id="analytics-view" class="analytics-overlay hidden">
+  <div class="analytics-container">
+    <div class="analytics-header">
+      <h2>Performance <span>Metrics</span></h2>
+      <button class="close-btn" onclick="toggleAnalytics()">✕</button>
+    </div>
+    
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-val" id="stat-streak">0</div>
+        <div class="metric-label">Current Streak (Days)</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-val" id="stat-7days">0</div>
+        <div class="metric-label">Solved Last 7 Days</div>
+      </div>
+    </div>
+
+    <div class="chart-section">
+      <h3>Contribution Heatmap (Last 60 Days)</h3>
+      <div class="heatmap-container" id="heatmap-container"></div>
+    </div>
+
+    <div class="chart-section">
+      <h3>Pace & Difficulty Breakdown</h3>
+      <div class="canvas-wrapper">
+        <canvas id="difficultyChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
